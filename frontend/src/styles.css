@@ -1,63 +1,222 @@
 :root {
 	--primary: #2563eb;
+	--primary-hover: #1d4ed8;
 	--danger: #dc2626;
+	--danger-hover: #b91c1c;
+  
 	--bg: #0b1220;
 	--card: #111827;
+	--card-hover: #1f2937;
+  
 	--text: #e5e7eb;
 	--muted: #9ca3af;
 	--border: #1f2937;
-}
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
-body {
+  
+	--shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+  
+  * {
+	box-sizing: border-box;
+  }
+  
+  html,
+  body,
+  #root {
+	height: 100%;
+  }
+  
+  body {
 	margin: 0;
 	background: var(--bg);
 	color: var(--text);
-	font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
-}
-.container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-.navbar {
-	display: flex; justify-content: space-between; align-items: center;
-	padding: 12px 0; margin-bottom: 16px; border-bottom: 1px solid var(--border);
-}
-.brand { color: var(--text); text-decoration: none; font-weight: 700; }
-.nav-links a { color: var(--text); text-decoration: none; margin-right: 12px; }
-.auth-actions a { color: var(--text); text-decoration: none; margin-left: 8px; }
-.btn {
+  
+	font-family: system-ui, -apple-system,
+	  Segoe UI, Roboto, Ubuntu,
+	  Cantarell, Arial, sans-serif;
+  }
+  
+  .container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+  }
+  
+  /* ---------------- NAVBAR ---------------- */
+  
+  .navbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+  
+	padding: 16px 0;
+	margin-bottom: 24px;
+  
+	border-bottom: 1px solid
+	  var(--border);
+  }
+  
+  .brand {
+	color: var(--text);
+	text-decoration: none;
+	font-size: 1.2rem;
+	font-weight: 700;
+  }
+  
+  .nav-links,
+  .auth-actions {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+  }
+  
+  .nav-links a,
+  .auth-actions a {
+	color: var(--text);
+	text-decoration: none;
+  }
+  
+  /* ---------------- BUTTONS ---------------- */
+  
+  .btn {
 	background: var(--primary);
 	color: white;
+  
 	border: none;
-	border-radius: 6px;
-	padding: 8px 12px;
-	cursor: pointer;
-}
-.btn.danger { background: var(--danger); }
-.card {
-	background: var(--card);
-	border: 1px solid var(--border);
-	border-radius: 10px;
-	padding: 16px;
-	margin-bottom: 16px;
-}
-.grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-	gap: 12px;
-}
-.row { display: flex; gap: 8px; align-items: center; }
-input, select, textarea {
-	width: 100%;
-	padding: 10px;
 	border-radius: 8px;
-	border: 1px solid var(--border);
+  
+	padding: 10px 14px;
+  
+	cursor: pointer;
+	transition: 0.2s ease;
+  }
+  
+  .btn:hover {
+	background: var(
+	  --primary-hover
+	);
+  }
+  
+  .btn.danger {
+	background: var(--danger);
+  }
+  
+  .btn.danger:hover {
+	background: var(
+	  --danger-hover
+	);
+  }
+  
+  /* ---------------- CARDS ---------------- */
+  
+  .card {
+	background: var(--card);
+	border: 1px solid
+	  var(--border);
+  
+	border-radius: 14px;
+	padding: 18px;
+  
+	margin-bottom: 18px;
+  
+	box-shadow: var(--shadow);
+  }
+  
+  .card:hover {
+	background: var(
+	  --card-hover
+	);
+  }
+  
+  .auth-card {
+	max-width: 420px;
+	margin: 40px auto;
+  }
+  
+  /* ---------------- GRID ---------------- */
+  
+  .grid {
+	display: grid;
+	grid-template-columns: repeat(
+	  auto-fill,
+	  minmax(280px, 1fr)
+	);
+	gap: 16px;
+  }
+  
+  /* ---------------- FORMS ---------------- */
+  
+  input,
+  select,
+  textarea {
+	width: 100%;
+	padding: 12px;
+  
+	border-radius: 8px;
+	border: 1px solid
+	  var(--border);
+  
 	background: #0f172a;
 	color: var(--text);
-	margin: 6px 0;
-}
-.center { text-align: center; padding: 24px; }
-.muted { color: var(--muted); font-size: 0.9em; }
-.error { color: var(--danger); }
-table { width: 100%; border-collapse: collapse; }
-th, td { border-bottom: 1px solid var(--border); padding: 8px; text-align: left; }
-a.card { color: var(--text); text-decoration: none; display: block; }
-
+  
+	margin: 8px 0;
+  }
+  
+  input:focus,
+  select:focus,
+  textarea:focus {
+	outline: none;
+	border-color: var(
+	  --primary
+	);
+  }
+  
+  /* ---------------- TABLE ---------------- */
+  
+  table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--card);
+	border-radius: 12px;
+	overflow: hidden;
+  }
+  
+  th,
+  td {
+	padding: 12px;
+	border-bottom: 1px solid
+	  var(--border);
+	text-align: left;
+  }
+  
+  th {
+	color: var(--muted);
+  }
+  
+  /* ---------------- HELPERS ---------------- */
+  
+  .row {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+  }
+  
+  .center {
+	text-align: center;
+	padding: 24px;
+  }
+  
+  .muted {
+	color: var(--muted);
+	font-size: 0.9rem;
+  }
+  
+  .error {
+	color: var(--danger);
+	margin-top: 8px;
+  }
+  
+  a.card {
+	color: var(--text);
+	text-decoration: none;
+	display: block;
+  }

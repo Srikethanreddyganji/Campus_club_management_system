@@ -1,29 +1,64 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-export function authenticate(req, res, next) {
-	const authHeader = req.headers.authorization || '';
-	const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
-	if (!token) {
-		return res.status(401).json({ message: 'Unauthorized' });
-	}
-	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
-		req.user = decoded;
-		return next();
-	} catch (err) {
-		return res.status(401).json({ message: 'Invalid token' });
-	}
+/* ---------------- AUTHENTICATE ---------------- */
+
+export async function authenticate(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Access token required",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "dev_secret"
+    );
+
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 }
 
-export function authorize(roles = []) {
-	const allowed = Array.isArray(roles) ? roles : [roles];
-	return async function (req, res, next) {
-		if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-		if (allowed.length === 0) return next();
-		if (allowed.includes(req.user.role)) return next();
-		// Organizer special case: allow organizers to manage their own club resources checked in controllers
-		return res.status(403).json({ message: 'Forbidden' });
-	};
-}
+/* ---------------- AUTHORIZE ---------------- */
 
+export function authorize(...roles) {
+  return function (req, res, next) {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    next();
+  };
+}

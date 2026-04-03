@@ -1,15 +1,48 @@
-import { Router } from 'express';
-import { authenticate, authorize } from '../middleware/auth.js';
-import { createClub, deleteClub, listClubs, updateClub, validateClubCreateOrUpdate, validateClubIdParam } from '../controllers/clubController.js';
+import { Router } from "express";
+
+import {
+  authenticate,
+  authorize,
+} from "../middleware/auth.js";
+
+import {
+  createClub,
+  deleteClub,
+  listClubs,
+  updateClub,
+  validateClubCreateOrUpdate,
+  validateClubIdParam,
+} from "../controllers/clubController.js";
 
 const router = Router();
 
-router.get('/', listClubs);
+/* ---------------- PUBLIC ---------------- */
+router.get("/", listClubs);
 
-router.use(authenticate, authorize(['admin']));
-router.post('/', validateClubCreateOrUpdate, createClub);
-router.put('/:id', validateClubIdParam, validateClubCreateOrUpdate, updateClub);
-router.delete('/:id', validateClubIdParam, deleteClub);
+/* ---------------- ADMIN ONLY ---------------- */
+router.post(
+  "/",
+  authenticate,
+  authorize("admin"),
+  validateClubCreateOrUpdate,
+  createClub
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  validateClubIdParam,
+  validateClubCreateOrUpdate,
+  updateClub
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  validateClubIdParam,
+  deleteClub
+);
 
 export default router;
-
