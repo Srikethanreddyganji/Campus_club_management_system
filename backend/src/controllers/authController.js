@@ -1,164 +1,172 @@
-import { validationResult, body } from "express-validator";
-import mongoose from "mongoose";
-import User from "../models/User.js";
-import Club from "../models/Club.js";
-import { generateToken } from "../utils/generateToken.js";
+import {
+  validationResult,
+  body,
+} from "express-validator";
 
-/* ---------------- VALIDATIONS ---------------- */
+import User from "../models/User.js";
+import { generateToken } from "../utils/generateToken.js";
 
 export const validateRegister = [
   body("name")
-    .trim()
-    .isLength({ min: 2 })
-    .withMessage("Name must be at least 2 characters"),
+    .isString()
+    .isLength({ min: 2 }),
 
-  body("email")
-    .isEmail()
-    .withMessage("Please enter a valid email")
-    .normalizeEmail(),
+  body("email").isEmail(),
 
-  body("password")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters"),
+  body("password").isLength({
+    min: 6,
+  }),
 
   body("role")
     .optional()
-    .isIn(["student", "organizer", "admin"])
-    .withMessage("Invalid role"),
+    .isIn([
+      "student",
+      "organizer",
+      "admin",
+    ]),
 
-  body("clubId")
+  body("clubCode")
     .optional()
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Invalid club ID");
-      }
-      return true;
-    }),
+    .isString(),
 ];
 
 export const validateLogin = [
-  body("email").isEmail().withMessage("Invalid email"),
+  body("email").isEmail(),
   body("password")
-    .isLength({ min: 6 })
-    .withMessage("Invalid password"),
+    .isString()
+    .isLength({ min: 6 }),
 ];
 
-/* ---------------- REGISTER ---------------- */
-
-export async function register(req, res) {
-  const errors = validationResult(req);
+export async function register(
+  req,
+  res
+) {
+  const errors =
+    validationResult(req);
 
   if (!errors.isEmpty()) {
     return res.status(400).json({
-      success: false,
       errors: errors.array(),
     });
   }
 
-  const { name, email, password, role = "student", clubId } = req.body;
+  const {
+    name,
+    email,
+    password,
+    role,
+    clubCode,
+  } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
+    const exists =
+      await User.findOne({
+        email,
+      });
 
-    if (existingUser) {
+    if (exists) {
       return res.status(409).json({
-        success: false,
-        message: "Email already registered",
+        message:
+          "Email already registered",
       });
     }
 
-    if (clubId) {
-      const clubExists = await Club.findById(clubId);
+    const user =
+      await User.create({
+        name,
+        email,
+        password,
+        role:
+          role ||
+          "student",
+        clubCode:
+          clubCode ||
+          null,
+      });
 
-      if (!clubExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Club not found",
-        });
-      }
-    }
+    const token =
+      generateToken(user);
 
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role,
-      clubId: clubId || null,
-    });
-
-    const token = generateToken(user);
-
-    return res.status(201).json({
-      success: true,
-      message: "User registered successfully",
+    res.status(201).json({
       token,
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
+        email:
+          user.email,
         role: user.role,
-        clubId: user.clubId,
+        clubCode:
+          user.clubCode,
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
+    res.status(500).json({
+      message:
+        error.message,
     });
   }
 }
 
-/* ---------------- LOGIN ---------------- */
-
-export async function login(req, res) {
-  const errors = validationResult(req);
+export async function login(
+  req,
+  res
+) {
+  const errors =
+    validationResult(req);
 
   if (!errors.isEmpty()) {
     return res.status(400).json({
-      success: false,
       errors: errors.array(),
     });
   }
 
-  const { email, password } = req.body;
+  const { email, password } =
+    req.body;
 
   try {
-    const user = await User.findOne({ email }).populate("clubId");
+    const user =
+      await User.findOne({
+        email,
+      });
 
     if (!user) {
       return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
+        message:
+          "Invalid credentials",
       });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const match =
+      await user.comparePassword(
+        password
+      );
 
-    if (!isMatch) {
+    if (!match) {
       return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
+        message:
+          "Invalid credentials",
       });
     }
 
-    const token = generateToken(user);
+    const token =
+      generateToken(user);
 
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
+    res.json({
       token,
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
+        email:
+          user.email,
         role: user.role,
-        clubId: user.clubId,
+        clubCode:
+          user.clubCode,
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
+    res.status(500).json({
+      message:
+        error.message,
     });
   }
 }

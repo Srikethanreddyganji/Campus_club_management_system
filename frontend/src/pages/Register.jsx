@@ -34,41 +34,36 @@ export default function Register() {
   const { register } =
     useAuth();
 
-  async function handleSubmit(
-    e
-  ) {
-    e.preventDefault();
-
-    setLoading(true);
-    setError("");
-
-    try {
-      await register({
-        name,
-        email,
-        password,
-        role,
-        clubId:
-          role ===
-          "organizer"
-            ? clubId
-            : null,
-      });
-
-      navigate(
-        "/dashboard"
-      );
-    } catch (error) {
-      setError(
-        error?.response
-          ?.data
-          ?.message ||
-          "Registration failed"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
+	async function handleSubmit(e) {
+		e.preventDefault();
+	  
+		setLoading(true);
+		setError("");
+	  
+		try {
+		  await register({
+			name,
+			email,
+			password,
+			role,
+			clubCode:
+			  role ===
+			  "organizer"
+				? clubId
+				: null,
+		  });
+	  
+		  navigate("/dashboard");
+		} catch (error) {
+		  setError(
+			error?.response?.data
+			  ?.message ||
+			  "Registration failed"
+		  );
+		} finally {
+		  setLoading(false);
+		}
+	  }
 
   return (
     <div className="card auth-card">

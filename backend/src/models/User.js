@@ -31,10 +31,11 @@ const userSchema = new mongoose.Schema(
       index: true,
     },
 
-    clubId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Club",
+    clubCode: {
+      type: String,
       default: null,
+      uppercase: true,
+      trim: true,
     },
 
     isActive: {
@@ -50,29 +51,29 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* ---------------- HASH PASSWORD ---------------- */
-
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   const salt = await bcrypt.genSalt(10);
-
-  this.password = await bcrypt.hash(this.password, salt);
+  this.password = await bcrypt.hash(
+    this.password,
+    salt
+  );
 
   next();
 });
 
-/* ---------------- PASSWORD CHECK ---------------- */
+userSchema.methods.comparePassword =
+  async function (candidatePassword) {
+    return bcrypt.compare(
+      candidatePassword,
+      this.password
+    );
+  };
 
-userSchema.methods.comparePassword = async function (
-  candidatePassword
-) {
-  return bcrypt.compare(
-    candidatePassword,
-    this.password
-  );
-};
-
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model(
+  "User",
+  userSchema
+);
 
 export default User;

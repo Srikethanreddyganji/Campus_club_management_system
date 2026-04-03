@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 
 const clubSchema = new mongoose.Schema(
   {
+    clubCode: {
+      type: String,
+      required: true,
+      unique: true,
+      uppercase: true,
+      trim: true,
+    },
+
     name: {
       type: String,
       required: true,

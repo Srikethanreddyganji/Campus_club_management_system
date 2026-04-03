@@ -58,26 +58,26 @@ import {
 	}
   
 	async function register(payload) {
-	  const { data } =
-		await api.post(
-		  "/auth/register",
-		  payload
+		const { data } =
+		  await api.post(
+			"/auth/register",
+			payload
+		  );
+	  
+		localStorage.setItem(
+		  "token",
+		  data.token
 		);
-  
-	  localStorage.setItem(
-		"token",
-		data.token
-	  );
-  
-	  localStorage.setItem(
-		"user",
-		JSON.stringify(data.user)
-	  );
-  
-	  setUser(data.user);
-  
-	  return data.user;
-	}
+	  
+		localStorage.setItem(
+		  "user",
+		  JSON.stringify(data.user)
+		);
+	  
+		setUser(data.user);
+	  
+		return data.user;
+	  }
   
 	function logout() {
 	  localStorage.removeItem(
