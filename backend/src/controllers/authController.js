@@ -26,7 +26,7 @@ export const validateRegister = [
     ]),
 
   body("clubCode")
-    .optional()
+    .optional({ nullable: true })
     .isString(),
 ];
 

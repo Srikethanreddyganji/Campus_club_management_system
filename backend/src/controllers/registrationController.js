@@ -55,25 +55,53 @@ export async function registerForEvent(req, res) {
       });
     }
 
-    /* check duplicate registration */
-    const existingRegistration = await Registration.findOne({
-      userId: req.user.id,
-      eventId,
-      status: "registered",
-    });
-
-    if (existingRegistration) {
-      return res.status(409).json({
+    /* check capacity */
+    if (event.registrationsCount >= event.maxParticipants) {
+      return res.status(400).json({
         success: false,
-        message: "Already registered for this event",
+        message: "Event is fully booked",
       });
     }
 
+    /* check for any existing registration (active OR previously cancelled) */
+    const existingRegistration = await Registration.findOne({
+      userId: req.user.id,
+      eventId,
+    });
+
+    if (existingRegistration) {
+      /* already actively registered */
+      if (existingRegistration.status === "registered") {
+        return res.status(409).json({
+          success: false,
+          message: "Already registered for this event",
+        });
+      }
+
+      /* previously cancelled — reactivate instead of inserting a duplicate row */
+      existingRegistration.status = "registered";
+      existingRegistration.registeredAt = new Date();
+      await existingRegistration.save();
+
+      /* increment count */
+      await Event.findByIdAndUpdate(eventId, { $inc: { registrationsCount: 1 } });
+
+      return res.status(200).json({
+        success: true,
+        message: "Registered successfully",
+        registration: existingRegistration,
+      });
+    }
+
+    /* no prior record — create fresh */
     const registration = await Registration.create({
       userId: req.user.id,
       eventId,
       status: "registered",
     });
+
+    /* increment count */
+    await Event.findByIdAndUpdate(eventId, { $inc: { registrationsCount: 1 } });
 
     return res.status(201).json({
       success: true,
@@ -111,8 +139,20 @@ export async function cancelRegistration(req, res) {
       });
     }
 
-    registration.status = "cancelled";
+    /* only decrement if it was actively registered */
+    if (registration.status === "registered") {
+      await Event.findByIdAndUpdate(registration.eventId, [
+        {
+          $set: {
+            registrationsCount: {
+              $max: [0, { $subtract: ["$registrationsCount", 1] }],
+            },
+          },
+        },
+      ]);
+    }
 
+    registration.status = "cancelled";
     await registration.save();
 
     return res.status(200).json({
@@ -136,8 +176,11 @@ export async function listMyRegistrations(req, res) {
       userId: req.user.id,
       status: "registered",
     })
-      .populate("eventId")
-      .sort({ createdAt: -1 });
+      .populate({
+        path: "eventId",
+        populate: { path: "clubId", select: "name" },
+      })
+      .sort({ registeredAt: -1 });
 
     return res.status(200).json({
       success: true,

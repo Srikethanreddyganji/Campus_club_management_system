@@ -38,6 +38,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    clubId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Club",
+      default: null,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

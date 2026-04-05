@@ -8,6 +8,7 @@ import {
 import {
   createClub,
   deleteClub,
+  getClubById,
   listClubs,
   updateClub,
   validateClubCreateOrUpdate,
@@ -18,6 +19,7 @@ const router = Router();
 
 /* ---------------- PUBLIC ---------------- */
 router.get("/", listClubs);
+router.get("/:id", validateClubIdParam, getClubById);
 
 /* ---------------- ADMIN ONLY ---------------- */
 router.post(

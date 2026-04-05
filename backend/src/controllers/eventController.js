@@ -166,7 +166,15 @@ export async function updateEvent(req, res) {
       });
     }
 
-    Object.assign(event, req.body);
+    /* never allow overwriting the computed count or audit fields */
+    const { registrationsCount, createdBy, clubId: newClubId, ...safeBody } = req.body;
+
+    /* admin can change the club; organizer cannot */
+    if (req.user.role === "admin" && newClubId) {
+      safeBody.clubId = newClubId;
+    }
+
+    Object.assign(event, safeBody);
 
     await event.save();
 

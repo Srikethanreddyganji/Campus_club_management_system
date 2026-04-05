@@ -49,6 +49,17 @@ const clubSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+/* Auto-generate clubCode from name if not provided */
+clubSchema.pre("validate", function (next) {
+  if (!this.clubCode && this.name) {
+    this.clubCode = this.name
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 12);
+  }
+  next();
+});
+
 const Club = mongoose.model("Club", clubSchema);
 
 export default Club;
