@@ -156,14 +156,13 @@ export async function updateEvent(req, res) {
       });
     }
 
-    if (
-      req.user.role === "organizer" &&
-      event.clubId.toString() !== req.user.clubId.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Cannot modify another club's event",
-      });
+    if (req.user.role === "organizer") {
+      if (!req.user.clubId || event.clubId.toString() !== req.user.clubId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Cannot modify another club's event",
+        });
+      }
     }
 
     /* never allow overwriting the computed count or audit fields */
@@ -204,14 +203,13 @@ export async function deleteEvent(req, res) {
       });
     }
 
-    if (
-      req.user.role === "organizer" &&
-      event.clubId.toString() !== req.user.clubId.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Cannot delete another club's event",
-      });
+    if (req.user.role === "organizer") {
+      if (!req.user.clubId || event.clubId.toString() !== req.user.clubId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Cannot delete another club's event",
+        });
+      }
     }
 
     await Registration.deleteMany({ eventId: event._id });
@@ -242,14 +240,13 @@ export async function listEventParticipants(req, res) {
       });
     }
 
-    if (
-      req.user.role === "organizer" &&
-      event.clubId.toString() !== req.user.clubId.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
+    if (req.user.role === "organizer") {
+      if (!req.user.clubId || event.clubId.toString() !== req.user.clubId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied",
+        });
+      }
     }
 
     const participants = await Registration.find({

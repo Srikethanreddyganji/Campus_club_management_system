@@ -41,7 +41,6 @@ export default function AdminUsers() {
   async function handleSave() {
     try {
       const { _id, ...body } = editUser;
-      // Only send allowed fields
       const payload = {
         name: body.name,
         role: body.role,
@@ -58,6 +57,27 @@ export default function AdminUsers() {
     }
   }
 
+  async function handleApproveOrganizer(userId, userName) {
+    try {
+      await api.patch(`/users/${userId}/approve-organizer`);
+      showMsg(`✅ Organizer "${userName}" approved!`);
+      fetchUsers();
+    } catch (err) {
+      showMsg("❌ " + (err?.response?.data?.message || "Failed to approve organizer"), "error");
+    }
+  }
+
+  async function handleRevokeOrganizer(userId, userName) {
+    if (!window.confirm(`Revoke organizer access for "${userName}"?`)) return;
+    try {
+      await api.patch(`/users/${userId}/revoke-organizer`);
+      showMsg(`⚠️ Organizer "${userName}" access revoked.`);
+      fetchUsers();
+    } catch (err) {
+      showMsg("❌ " + (err?.response?.data?.message || "Failed to revoke organizer"), "error");
+    }
+  }
+
   async function handleDelete(id) {
     if (!window.confirm("Delete this user permanently?")) return;
     try {
@@ -65,11 +85,15 @@ export default function AdminUsers() {
       showMsg("✅ User deleted.");
       fetchUsers();
     } catch (err) {
-      showMsg("❌ Failed to delete user.", "error");
+      showMsg("❌ " + (err?.response?.data?.message || "Failed to delete user."), "error");
     }
   }
 
   const roleColors = { admin: "role-admin", organizer: "role-organizer", student: "role-student" };
+
+  // Separate pending organizers for a highlighted section
+  const pendingOrganizers = users.filter(u => u.role === "organizer" && !u.organizerApproved);
+  const allUsers = users;
 
   return (
     <div className="admin-users-page">
@@ -78,12 +102,87 @@ export default function AdminUsers() {
           <span className="page-title-icon">👥</span>
           Manage Users
         </h2>
-        <p className="page-subtitle">View, edit roles, and manage all registered users</p>
+        <p className="page-subtitle">View, edit roles, approve organizers, and manage all registered users</p>
       </div>
 
       {message.text && (
         <div className={`toast ${message.type === "error" ? "toast-error" : "toast-success"}`}>
           {message.text}
+        </div>
+      )}
+
+      {/* ===== PENDING ORGANIZER APPROVALS ===== */}
+      {pendingOrganizers.length > 0 && (
+        <div className="pending-approvals-section" style={{
+          background: "linear-gradient(135deg, rgba(255, 159, 67, 0.1), rgba(255, 107, 107, 0.08))",
+          border: "1px solid rgba(255, 159, 67, 0.3)",
+          borderRadius: "12px",
+          padding: "24px",
+          marginBottom: "28px",
+        }}>
+          <h3 style={{
+            margin: "0 0 16px 0",
+            fontSize: "1.15rem",
+            color: "#ff9f43",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}>
+            <span>⏳</span> Pending Organizer Approvals
+            <span style={{
+              background: "#ff9f43",
+              color: "#1a1a2e",
+              borderRadius: "12px",
+              padding: "2px 10px",
+              fontSize: "0.8rem",
+              fontWeight: "700",
+            }}>{pendingOrganizers.length}</span>
+          </h3>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {pendingOrganizers.map((user) => (
+              <div key={user._id} style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "rgba(255,255,255,0.04)",
+                borderRadius: "8px",
+                padding: "12px 16px",
+                flexWrap: "wrap",
+                gap: "10px",
+              }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <span style={{ fontWeight: "600", fontSize: "0.95rem" }}>{user.name}</span>
+                  <span style={{ color: "var(--text-secondary, #999)", fontSize: "0.85rem" }}>{user.email}</span>
+                  {user.clubId?.name && (
+                    <span style={{ color: "var(--text-secondary, #999)", fontSize: "0.8rem" }}>
+                      Club: {user.clubId.name}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    className="btn btn-sm"
+                    style={{
+                      background: "linear-gradient(135deg, #00b894, #00cec9)",
+                      color: "#fff",
+                      border: "none",
+                      fontWeight: "600",
+                    }}
+                    onClick={() => handleApproveOrganizer(user._id, user.name)}
+                  >
+                    ✅ Approve
+                  </button>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => handleDelete(user._id)}
+                  >
+                    🗑️ Reject & Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -99,12 +198,13 @@ export default function AdminUsers() {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Status</th>
                 <th>Club</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {allUsers.map((user) => (
                 <tr key={user._id}>
                   <td className="td-name">{user.name}</td>
                   <td className="td-email muted">{user.email}</td>
@@ -113,17 +213,71 @@ export default function AdminUsers() {
                       {user.role}
                     </span>
                   </td>
+                  <td>
+                    {user.role === "organizer" ? (
+                      user.organizerApproved ? (
+                        <span style={{
+                          color: "#00b894",
+                          fontWeight: "600",
+                          fontSize: "0.82rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}>✅ Approved</span>
+                      ) : (
+                        <span style={{
+                          color: "#ff9f43",
+                          fontWeight: "600",
+                          fontSize: "0.82rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}>⏳ Pending</span>
+                      )
+                    ) : (
+                      <span className="muted" style={{ fontSize: "0.82rem" }}>—</span>
+                    )}
+                  </td>
                   <td className="muted">
                     {user.clubId?.name || user.clubCode || "—"}
                   </td>
                   <td>
-                    <div className="row gap-sm">
+                    <div className="row gap-sm" style={{ flexWrap: "wrap" }}>
                       <button
                         className="btn btn-sm"
                         onClick={() => setEditUser({ ...user, clubId: user.clubId?._id || "" })}
                       >
                         Edit
                       </button>
+
+                      {/* Approve / Revoke for organizers */}
+                      {user.role === "organizer" && !user.organizerApproved && (
+                        <button
+                          className="btn btn-sm"
+                          style={{
+                            background: "linear-gradient(135deg, #00b894, #00cec9)",
+                            color: "#fff",
+                            border: "none",
+                          }}
+                          onClick={() => handleApproveOrganizer(user._id, user.name)}
+                        >
+                          Approve
+                        </button>
+                      )}
+                      {user.role === "organizer" && user.organizerApproved && (
+                        <button
+                          className="btn btn-sm"
+                          style={{
+                            background: "linear-gradient(135deg, #e17055, #d63031)",
+                            color: "#fff",
+                            border: "none",
+                          }}
+                          onClick={() => handleRevokeOrganizer(user._id, user.name)}
+                        >
+                          Revoke
+                        </button>
+                      )}
+
                       <button
                         className="btn btn-sm btn-danger"
                         onClick={() => handleDelete(user._id)}

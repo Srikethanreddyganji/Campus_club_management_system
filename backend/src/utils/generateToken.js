@@ -4,6 +4,7 @@ export function generateToken(user) {
   const payload = {
     id: user._id.toString(),
     role: user.role,
+    organizerApproved: user.organizerApproved || false,
   };
 
   const secret =

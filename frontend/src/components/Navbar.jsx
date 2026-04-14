@@ -15,6 +15,9 @@ export default function Navbar() {
     transition: "all 0.2s ease",
   });
 
+  const isApprovedOrganizer =
+    user?.role === "organizer" && user?.organizerApproved;
+
   return (
     <nav className="navbar">
       {/* Brand */}
@@ -34,14 +37,37 @@ export default function Navbar() {
           </NavLink>
         )}
 
-        {user?.role === "organizer" && (
+        {/* Only show organizer links for APPROVED organizers */}
+        {isApprovedOrganizer && (
           <NavLink to="/organizer/events" style={navLinkStyle}>
             Manage Events
           </NavLink>
         )}
 
+        {/* Unapproved organizer sees a disabled indicator */}
+        {user?.role === "organizer" && !user?.organizerApproved && (
+          <span
+            style={{
+              padding: "8px 14px",
+              borderRadius: "8px",
+              fontSize: "0.85rem",
+              color: "var(--warning)",
+              opacity: 0.7,
+              cursor: "not-allowed",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            ⏳ Pending Approval
+          </span>
+        )}
+
         {user?.role === "admin" && (
           <>
+            <NavLink to="/organizer/events" style={navLinkStyle}>
+              Manage Events
+            </NavLink>
             <NavLink to="/admin/users" style={navLinkStyle}>
               Users
             </NavLink>

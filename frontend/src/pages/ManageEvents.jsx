@@ -12,6 +12,11 @@ export default function ManageEvents() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [editingId, setEditingId] = useState(null);
 
+  /* participants panel state */
+  const [participants, setParticipants] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+
   /* resolve user's clubId regardless of populated vs raw */
   const myClubId = user?.clubId?._id || user?.clubId || "";
 
@@ -131,9 +136,29 @@ export default function ManageEvents() {
       await api.delete(`/events/${id}`);
       showMsg("✅ Event deleted.");
       if (editingId === id) resetForm();
+      if (selectedEventId === id) setSelectedEventId(null);
       fetchEvents();
-    } catch {
-      showMsg("❌ Failed to delete event.", "error");
+    } catch (err) {
+      showMsg("❌ " + (err?.response?.data?.message || "Failed to delete event."), "error");
+    }
+  }
+
+  async function viewParticipants(id) {
+    if (id === selectedEventId) {
+      setSelectedEventId(null);
+      return;
+    }
+    setSelectedEventId(id);
+    setLoadingParticipants(true);
+    try {
+      const { data } = await api.get(`/events/${id}/participants`);
+      setParticipants(data.participants || []);
+    } catch (err) {
+      console.error("Failed to fetch participants:", err);
+      showMsg("❌ " + (err?.response?.data?.message || "Failed to load participants."), "error");
+      setParticipants([]);
+    } finally {
+      setLoadingParticipants(false);
     }
   }
 
@@ -324,12 +349,41 @@ export default function ManageEvents() {
                   Edit
                 </button>
                 <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() => viewParticipants(event._id)}
+                >
+                  {selectedEventId === event._id ? "Hide" : "👥 Participants"}
+                </button>
+                <button
                   className="btn btn-sm btn-danger"
                   onClick={() => handleDelete(event._id)}
                 >
                   Delete
                 </button>
               </div>
+
+              {/* Participants Panel */}
+              {selectedEventId === event._id && (
+                <div className="participants-panel">
+                  <h4>👥 Registered Participants</h4>
+                  {loadingParticipants ? (
+                    <div className="center-loader" style={{ padding: "16px 0" }}>
+                      <div className="spinner" />
+                    </div>
+                  ) : participants.length === 0 ? (
+                    <p className="muted">No participants registered yet.</p>
+                  ) : (
+                    <ul className="participants-list">
+                      {participants.map((p) => (
+                        <li key={p._id}>
+                          <span className="participant-name">{p.userId?.name || "Unknown"}</span>
+                          <span className="participant-email muted">{p.userId?.email || "—"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

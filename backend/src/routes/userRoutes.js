@@ -6,9 +6,11 @@ import {
 } from "../middleware/auth.js";
 
 import {
+  approveOrganizer,
   deleteUser,
   getMe,
   listUsers,
+  revokeOrganizer,
   updateUser,
   validateUserIdParam,
   validateUserUpdate,
@@ -38,6 +40,23 @@ router.put(
   validateUserIdParam,
   validateUserUpdate,
   updateUser
+);
+
+/* approve / revoke organizer */
+router.patch(
+  "/:id/approve-organizer",
+  authenticate,
+  authorize("admin"),
+  validateUserIdParam,
+  approveOrganizer
+);
+
+router.patch(
+  "/:id/revoke-organizer",
+  authenticate,
+  authorize("admin"),
+  validateUserIdParam,
+  revokeOrganizer
 );
 
 router.delete(

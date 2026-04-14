@@ -71,23 +71,6 @@ export default function Login() {
           Create account
         </Link>
       </p>
-
-      {/* Quick login hint */}
-      <div style={{
-        marginTop: "24px",
-        padding: "14px",
-        background: "rgba(99,102,241,0.08)",
-        borderRadius: "10px",
-        border: "1px solid rgba(99,102,241,0.2)",
-        fontSize: "0.78rem",
-        color: "var(--text-secondary)",
-        lineHeight: "1.8"
-      }}>
-        <strong style={{ color: "var(--text)", display: "block", marginBottom: "4px" }}>🔐 Demo Accounts</strong>
-        Admin: <code style={{ color: "var(--accent)" }}>admin@example.com</code> / Admin@123<br />
-        Organizer: <code style={{ color: "var(--accent)" }}>organizer@example.com</code> / Organizer@123<br />
-        Student: <code style={{ color: "var(--accent)" }}>student@example.com</code> / Student@123
-      </div>
     </div>
   );
 }
