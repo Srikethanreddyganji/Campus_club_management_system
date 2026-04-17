@@ -6,12 +6,14 @@ import {
 } from "react";
 
 import api from "./api.js";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -77,7 +79,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/login";
+    navigate("/login");
   }
 
   /* Helper to refresh user data after admin does approval etc. */
