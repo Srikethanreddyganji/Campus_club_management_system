@@ -55,6 +55,13 @@ app.get("/", (req, res) => res.send("Server is live"));
 
 app.get("/api/test", (req, res) => res.json({ message: "API working" }));
 
+app.get("/api", (req, res) => {
+  res.json({
+    success: true,
+    message: "API Root working 🚀"
+  });
+});
+
 app.use("/api", routes);
 
 /* ---------------- ERROR HANDLERS ---------------- */
