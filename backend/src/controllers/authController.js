@@ -64,8 +64,8 @@ export async function register(req, res) {
       });
     }
 
-    /* Prevent self-assignment of admin role via API */
-    let safeRole = role || "student";
+    /* Prevent self-assignment of admin role via API and normalize casing */
+    let safeRole = (role || "student").toLowerCase();
     if (safeRole === "admin") {
       safeRole = "student";
     }
@@ -105,6 +105,7 @@ export async function register(req, res) {
       },
     });
   } catch (error) {
+    console.error("Registration Error:", error);
     res.status(500).json({
       message: error.message,
     });

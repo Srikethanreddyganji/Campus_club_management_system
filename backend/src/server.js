@@ -51,19 +51,9 @@ app.get("/api/health", (req, res) => {
 
 /* ---------------- ROUTES ---------------- */
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Campus Club Management System is live.",
-  });
-});
+app.get("/", (req, res) => res.send("Server is live"));
 
-app.get("/api", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Welcome to Campus Club Management System API.",
-  });
-});
+app.get("/api/test", (req, res) => res.json({ message: "API working" }));
 
 app.use("/api", routes);
 
