@@ -33,7 +33,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: true,
+    origin: process.env.NODE_ENV === "production" ? CLIENT_URL : true,
     credentials: true,
   })
 );
@@ -53,6 +53,20 @@ app.get("/api/health", (req, res) => {
 });
 
 /* ---------------- ROUTES ---------------- */
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Campus Club Management System is live.",
+  });
+});
+
+app.get("/api", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to Campus Club Management System API.",
+  });
+});
 
 app.use("/api", routes);
 

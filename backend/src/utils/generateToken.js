@@ -7,8 +7,13 @@ export function generateToken(user) {
     organizerApproved: user.organizerApproved || false,
   };
 
-  const secret =
-    process.env.JWT_SECRET || "dev_secret";
+  let secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("JWT_SECRET environment variable is missing in production!");
+    }
+    secret = "dev_secret";
+  }
 
   const expiresIn =
     process.env.JWT_EXPIRES_IN || "7d";
