@@ -114,8 +114,8 @@ export default function AdminUsers() {
       {/* ===== PENDING ORGANIZER APPROVALS ===== */}
       {pendingOrganizers.length > 0 && (
         <div className="pending-approvals-section" style={{
-          background: "linear-gradient(135deg, rgba(255, 159, 67, 0.1), rgba(255, 107, 107, 0.08))",
-          border: "1px solid rgba(255, 159, 67, 0.3)",
+          background: "linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.06))",
+          border: "1px solid rgba(245, 158, 11, 0.25)",
           borderRadius: "12px",
           padding: "24px",
           marginBottom: "28px",
@@ -123,15 +123,15 @@ export default function AdminUsers() {
           <h3 style={{
             margin: "0 0 16px 0",
             fontSize: "1.15rem",
-            color: "#ff9f43",
+            color: "#d97706",
             display: "flex",
             alignItems: "center",
             gap: "8px",
           }}>
             <span>⏳</span> Pending Organizer Approvals
             <span style={{
-              background: "#ff9f43",
-              color: "#1a1a2e",
+               background: "#f59e0b",
+               color: "#ffffff",
               borderRadius: "12px",
               padding: "2px 10px",
               fontSize: "0.8rem",
@@ -145,7 +145,7 @@ export default function AdminUsers() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                background: "rgba(255,255,255,0.04)",
+                background: "rgba(37,99,235,0.04)",
                 borderRadius: "8px",
                 padding: "12px 16px",
                 flexWrap: "wrap",
@@ -153,9 +153,9 @@ export default function AdminUsers() {
               }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                   <span style={{ fontWeight: "600", fontSize: "0.95rem" }}>{user.name}</span>
-                  <span style={{ color: "var(--text-secondary, #999)", fontSize: "0.85rem" }}>{user.email}</span>
+                   <span style={{ color: "var(--text-secondary, #475569)", fontSize: "0.85rem" }}>{user.email}</span>
                   {user.clubId?.name && (
-                    <span style={{ color: "var(--text-secondary, #999)", fontSize: "0.8rem" }}>
+                     <span style={{ color: "var(--text-secondary, #475569)", fontSize: "0.8rem" }}>
                       Club: {user.clubId.name}
                     </span>
                   )}
@@ -164,7 +164,7 @@ export default function AdminUsers() {
                   <button
                     className="btn btn-sm"
                     style={{
-                      background: "linear-gradient(135deg, #00b894, #00cec9)",
+                      background: "linear-gradient(135deg, #10b981, #2563eb)",
                       color: "#fff",
                       border: "none",
                       fontWeight: "600",
@@ -217,7 +217,7 @@ export default function AdminUsers() {
                     {user.role === "organizer" ? (
                       user.organizerApproved ? (
                         <span style={{
-                          color: "#00b894",
+                          color: "#10b981",
                           fontWeight: "600",
                           fontSize: "0.82rem",
                           display: "inline-flex",
@@ -226,7 +226,7 @@ export default function AdminUsers() {
                         }}>✅ Approved</span>
                       ) : (
                         <span style={{
-                          color: "#ff9f43",
+                          color: "#d97706",
                           fontWeight: "600",
                           fontSize: "0.82rem",
                           display: "inline-flex",
@@ -255,7 +255,7 @@ export default function AdminUsers() {
                         <button
                           className="btn btn-sm"
                           style={{
-                            background: "linear-gradient(135deg, #00b894, #00cec9)",
+                             background: "linear-gradient(135deg, #10b981, #2563eb)",
                             color: "#fff",
                             border: "none",
                           }}
@@ -268,7 +268,7 @@ export default function AdminUsers() {
                         <button
                           className="btn btn-sm"
                           style={{
-                            background: "linear-gradient(135deg, #e17055, #d63031)",
+                             background: "linear-gradient(135deg, #ef4444, #dc2626)",
                             color: "#fff",
                             border: "none",
                           }}

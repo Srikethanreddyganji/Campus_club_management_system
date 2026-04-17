@@ -96,7 +96,7 @@ export default function Navbar() {
               alignItems: "center",
               gap: "10px",
               padding: "6px 14px",
-              background: "rgba(255,255,255,0.04)",
+              background: "rgba(37,99,235,0.06)",
               borderRadius: "99px",
               border: "1px solid var(--border)",
             }}>
