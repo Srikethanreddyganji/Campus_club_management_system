@@ -62,7 +62,6 @@ app.get("/api", (req, res) => {
   });
 });
 
-app.use("/", routes);
 app.use("/api", routes);
 
 /* ---------------- ERROR HANDLERS ---------------- */
