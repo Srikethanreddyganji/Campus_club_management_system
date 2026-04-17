@@ -33,7 +33,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: true,
     credentials: true,
   })
 );
