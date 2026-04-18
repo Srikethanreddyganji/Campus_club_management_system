@@ -66,19 +66,27 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await mongoose.connect(MONGO_URI);
-
     console.log("MongoDB connected successfully");
 
-    app.listen(PORT, () => {
-      console.log(
-        `Server running on http://localhost:${PORT}`
-      );
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+
+    server.on("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(
+          `\n❌ Port ${PORT} is already in use.\n` +
+          `   Please stop the other process first:\n` +
+          `   Run: netstat -ano | findstr :${PORT}\n` +
+          `   Then: taskkill /PID <pid> /F\n`
+        );
+      } else {
+        console.error("Server error:", err.message);
+      }
+      process.exit(1);
     });
   } catch (error) {
-    console.error(
-      "Failed to start server:",
-      error.message
-    );
+    console.error("Failed to start server:", error.message);
     process.exit(1);
   }
 }
