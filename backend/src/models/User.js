@@ -44,11 +44,6 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    organizerApproved: {
-      type: Boolean,
-      default: false,
-    },
-
     isActive: {
       type: Boolean,
       default: true,

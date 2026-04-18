@@ -3,7 +3,6 @@ import { Router } from "express";
 import {
   authenticate,
   authorize,
-  authorizeApprovedOrganizer,
 } from "../middleware/auth.js";
 
 import {
@@ -28,12 +27,11 @@ router.get(
   getEventById
 );
 
-/* ---------------- ADMIN + APPROVED ORGANIZER ---------------- */
+/* ---------------- ADMIN + ORGANIZER ---------------- */
 router.post(
   "/",
   authenticate,
   authorize("organizer", "admin"),
-  authorizeApprovedOrganizer,
   validateCreateOrUpdateEvent,
   createEvent
 );
@@ -42,7 +40,6 @@ router.put(
   "/:id",
   authenticate,
   authorize("organizer", "admin"),
-  authorizeApprovedOrganizer,
   validateEventIdParam,
   validateCreateOrUpdateEvent,
   updateEvent
@@ -52,7 +49,6 @@ router.delete(
   "/:id",
   authenticate,
   authorize("organizer", "admin"),
-  authorizeApprovedOrganizer,
   validateEventIdParam,
   deleteEvent
 );
@@ -62,7 +58,6 @@ router.get(
   "/:id/participants",
   authenticate,
   authorize("organizer", "admin"),
-  authorizeApprovedOrganizer,
   validateEventIdParam,
   listEventParticipants
 );

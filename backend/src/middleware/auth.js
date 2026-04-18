@@ -62,30 +62,3 @@ export function authorize(...roles) {
     next();
   };
 }
-
-/* ---------------- APPROVE CHECK FOR ORGANIZER ---------------- */
-
-export function authorizeApprovedOrganizer(req, res, next) {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
-
-  /* admins always pass */
-  if (req.user.role === "admin") {
-    return next();
-  }
-
-  /* organizer must be approved */
-  if (req.user.role === "organizer" && !req.user.organizerApproved) {
-    return res.status(403).json({
-      success: false,
-      message: "Your organizer account is pending admin approval",
-      pendingApproval: true,
-    });
-  }
-
-  next();
-}

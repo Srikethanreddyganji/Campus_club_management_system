@@ -42,19 +42,11 @@ async function seedDatabase() {
         email: "organizer@example.com",
         password: "Organizer@123",
         role: "organizer",
-        organizerApproved: true,
       });
 
-      console.log("✅ Organizer created (approved)");
+      console.log("✅ Organizer created");
     } else {
-      /* ensure existing organizer is approved */
-      if (!organizer.organizerApproved) {
-        organizer.organizerApproved = true;
-        await organizer.save();
-        console.log("✅ Existing organizer approved");
-      } else {
-        console.log("ℹ️  Organizer already exists (approved)");
-      }
+      console.log("ℹ️  Organizer already exists");
     }
 
     /* ---------------- CLUBS ---------------- */

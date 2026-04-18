@@ -31,9 +31,12 @@ const CLIENT_URL =
 
 app.use(helmet());
 
-app.use(cors({
-  origin: "*"
-}));
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -50,17 +53,6 @@ app.get("/api/health", (req, res) => {
 });
 
 /* ---------------- ROUTES ---------------- */
-
-app.get("/", (req, res) => res.send("Server is live"));
-
-app.get("/api/test", (req, res) => res.json({ message: "API working" }));
-
-app.get("/api", (req, res) => {
-  res.json({
-    success: true,
-    message: "API Root working 🚀"
-  });
-});
 
 app.use("/api", routes);
 
