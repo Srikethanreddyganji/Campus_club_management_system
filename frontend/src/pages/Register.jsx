@@ -8,7 +8,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student");
-  const [clubCode, setClubCode] = useState("");
+  const [selectedClub, setSelectedClub] = useState("");   // stores club _id
   const [clubs, setClubs] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,6 @@ export default function Register() {
   const { register } = useAuth();
 
   useEffect(() => {
-    // Fetch clubs so organizer can pick one by name
     api.get("/clubs")
       .then(({ data }) => setClubs(data.clubs || []))
       .catch(() => {});
@@ -27,13 +26,17 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // resolve clubCode from selected club id
+    const club = clubs.find((c) => c._id === selectedClub);
+
     try {
       await register({
         name,
         email,
         password,
         role,
-        ...(role === "organizer" && clubCode ? { clubCode } : {}),
+        ...(role === "organizer" && club ? { clubCode: club.clubCode } : {}),
       });
       navigate("/dashboard");
     } catch (err) {
@@ -91,7 +94,10 @@ export default function Register() {
 
         <div className="form-group">
           <label>I am a…</label>
-          <select value={role} onChange={(e) => { setRole(e.target.value); setClubCode(""); }}>
+          <select
+            value={role}
+            onChange={(e) => { setRole(e.target.value); setSelectedClub(""); }}
+          >
             <option value="student">Student</option>
             <option value="organizer">Organizer</option>
           </select>
@@ -99,19 +105,19 @@ export default function Register() {
 
         {role === "organizer" && (
           <div className="form-group">
-            <label>Club Code (ask your admin)</label>
-            <input
-              type="text"
-              placeholder="e.g. TECHCLUB"
-              value={clubCode}
-              onChange={(e) => setClubCode(e.target.value.toUpperCase())}
+            <label>Select Your Club</label>
+            <select
+              value={selectedClub}
+              onChange={(e) => setSelectedClub(e.target.value)}
               required
-            />
-            {clubs.length > 0 && (
-              <p className="muted" style={{ fontSize: "0.78rem", marginTop: "4px" }}>
-                Available clubs: {clubs.map((c) => <strong key={c._id} style={{ color: "var(--accent)", marginRight: "8px" }}>{c.clubCode}</strong>)}
-              </p>
-            )}
+            >
+              <option value="">— Choose a club —</option>
+              {clubs.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}  ({c.clubCode})
+                </option>
+              ))}
+            </select>
           </div>
         )}
 

@@ -12,6 +12,12 @@ export default function ManageEvents() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [editingId, setEditingId] = useState(null);
 
+  /* Participants panel state */
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [participants, setParticipants] = useState([]);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const [participantsError, setParticipantsError] = useState("");
+
   /* resolve user's clubId regardless of populated vs raw */
   const myClubId = user?.clubId?._id || user?.clubId || "";
 
@@ -56,6 +62,29 @@ export default function ManageEvents() {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  async function fetchParticipants(event) {
+    setSelectedEvent(event);
+    setParticipants([]);
+    setParticipantsError("");
+    setLoadingParticipants(true);
+    try {
+      const { data } = await api.get(`/events/${event._id}/participants`);
+      setParticipants(data.participants || []);
+    } catch (err) {
+      setParticipantsError(
+        err?.response?.data?.message || "Failed to load participants."
+      );
+    } finally {
+      setLoadingParticipants(false);
+    }
+  }
+
+  function closeParticipants() {
+    setSelectedEvent(null);
+    setParticipants([]);
+    setParticipantsError("");
   }
 
   function handleChange(e) {
@@ -122,6 +151,7 @@ export default function ManageEvents() {
       maxParticipants: event.maxParticipants || 100,
       clubId: event.clubId?._id || event.clubId || "",
     });
+    closeParticipants();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -131,6 +161,7 @@ export default function ManageEvents() {
       await api.delete(`/events/${id}`);
       showMsg("✅ Event deleted.");
       if (editingId === id) resetForm();
+      if (selectedEvent?._id === id) closeParticipants();
       fetchEvents();
     } catch {
       showMsg("❌ Failed to delete event.", "error");
@@ -304,7 +335,10 @@ export default function ManageEvents() {
       ) : (
         <div className="events-grid">
           {filteredEvents.map((event) => (
-            <div key={event._id} className="event-card">
+            <div
+              key={event._id}
+              className={`event-card${selectedEvent?._id === event._id ? " event-card-selected" : ""}`}
+            >
               <div className="event-card-top">
                 <span className={`status-badge status-${event.status}`}>
                   {event.status}
@@ -320,6 +354,16 @@ export default function ManageEvents() {
                 </span>
               </div>
               <div className="event-card-actions">
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() =>
+                    selectedEvent?._id === event._id
+                      ? closeParticipants()
+                      : fetchParticipants(event)
+                  }
+                >
+                  {selectedEvent?._id === event._id ? "Hide Participants" : "👥 Participants"}
+                </button>
                 <button className="btn btn-sm" onClick={() => handleEdit(event)}>
                   Edit
                 </button>
@@ -332,6 +376,66 @@ export default function ManageEvents() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* PARTICIPANTS PANEL */}
+      {selectedEvent && (
+        <div className="participants-panel">
+          <div className="section-header" style={{ marginTop: "32px" }}>
+            <h3 className="section-title">
+              👥 Participants — <span style={{ color: "var(--primary)" }}>{selectedEvent.title}</span>
+            </h3>
+            <button className="btn btn-sm btn-ghost" onClick={closeParticipants}>
+              ✕ Close
+            </button>
+          </div>
+
+          {loadingParticipants ? (
+            <div className="center-loader">
+              <div className="spinner" />
+            </div>
+          ) : participantsError ? (
+            <div className="empty-state">
+              <div className="empty-icon">⚠️</div>
+              <p>{participantsError}</p>
+            </div>
+          ) : participants.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">🎫</div>
+              <p>No participants registered for this event yet.</p>
+            </div>
+          ) : (
+            <div className="participants-table-wrap">
+              <table className="participants-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Registered At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {participants.map((reg, idx) => (
+                    <tr key={reg._id}>
+                      <td>{idx + 1}</td>
+                      <td>{reg.userId?.name || "—"}</td>
+                      <td>{reg.userId?.email || "—"}</td>
+                      <td>
+                        {reg.registeredAt
+                          ? new Date(reg.registeredAt).toLocaleString()
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="muted" style={{ marginTop: "8px", fontSize: "0.8rem" }}>
+                Showing {participants.length} registered participant{participants.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
